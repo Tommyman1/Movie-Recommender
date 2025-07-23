@@ -1,5 +1,7 @@
 import pandas as pd
 from datetime import datetime
+from sklearn.neighbors import NearestNeighbors
+import random
 
 def scale(number_scale):
     min = number_scale.min()
@@ -146,6 +148,32 @@ if __name__ == "__main__":
     #scales the start year
     df["startYear"] = scale(df["startYear"])
 
+    temp_df = df.copy()
+    temp_df = temp_df.drop(columns = ["primaryTitle"])
+    temp_wl = wl.copy()
+    temp_wl = temp_wl.drop(columns = ["primaryTitle"])
     
+    recommend = "The movies that we recommend to you based on your last movie are: "
+    if len(wl) < 10:
+        knn = NearestNeighbors(n_neighbors=10)
+        knn.fit(temp_df)
+        distance, indices = knn.kneighbors(temp_wl.loc[[temp_wl.index[-1]]])
+        
+        for inx in indices[0]:
+            recommend += "\n " + df.loc[inx]["primaryTitle"]
     
+    else:
+        knn = NearestNeighbors(n_neighbors=10)
+        knn.fit(temp_df)
+        
+        r = random.randrange(0,temp_wl.index[-1])
+            
+        distance, indices = knn.kneighbors(temp_wl.loc[[r]])
+        
+        for inx in indices[0]:
+            recommend += "\n " + df.loc[inx]["primaryTitle"]
+            
+    print(recommend)
+            
+        
     
